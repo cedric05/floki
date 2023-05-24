@@ -13,7 +13,7 @@ pub(crate) enum Subcommand {
     #[structopt(name = "pull")]
     Pull {},
 
-    /// Generate shell completions to stdout.
+    /// Generate shell cocmpletions to stdout.
     #[structopt(name = "completion")]
     Completion {
         /// The shell to generate completions for.  Choose from: bash, fish, zsh, powershell, elvish
