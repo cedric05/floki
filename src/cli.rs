@@ -20,6 +20,10 @@ pub(crate) enum Subcommand {
         #[structopt(name = "SHELL", parse(try_from_str))]
         shell: structopt::clap::Shell,
     },
+
+    /// enter attach container
+    #[structopt(name = "attach")]
+    Attach,
 }
 
 /// Main CLI interface

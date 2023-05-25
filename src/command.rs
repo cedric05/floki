@@ -40,26 +40,42 @@ impl Drop for DaemonHandle {
 }
 
 impl DockerCommandBuilder {
-    pub fn run(&self, command: &[&str]) -> Result<(), Error> {
-        debug!(
+    pub fn attach(&self, command_str: &[&str]) -> Result<(), Error> {
+        println!(
+            "Attaching docker command with configuration: {:?} args: {:?}",
+            self, command_str
+        );
+        let mut command = Command::new("docker");
+        command
+            .args(["start", "-ai", &self.name])
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .stdin(Stdio::inherit());
+        command.spawn().unwrap().wait().unwrap();
+        Ok(())
+    }
+    pub fn run(&self, command_str: &[&str]) -> Result<(), Error> {
+        println!(
             "Spawning docker command with configuration: {:?} args: {:?}",
-            self, command
+            self, command_str
         );
 
-        let mut command = Command::new("docker")
+        let mut command = Command::new("docker");
+        command
             .args(self.base_args())
             .args(&self.build_volume_switches())
             .args(self.build_environment_switches())
             .args(self.build_docker_switches())
+            .args(["--name", &self.name])
             .arg(&self.image)
-            .args(command)
+            .args(command_str)
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .stdin(Stdio::inherit())
+            .stdin(Stdio::inherit());
+        let mut child = command
             .spawn()
             .map_err(|e| FlokiError::FailedToLaunchDocker { error: e })?;
-
-        let exit_status = command
+        let exit_status = child
             .wait()
             .map_err(|e| FlokiError::FailedToCompleteDockerCommand { error: e })?;
         if exit_status.success() {
@@ -177,7 +193,7 @@ impl DockerCommandBuilder {
     }
 
     fn base_args(&self) -> Vec<&OsStr> {
-        let mut base_args: Vec<&OsStr> = vec!["run".as_ref(), "--rm".as_ref(), "-t".as_ref()];
+        let mut base_args: Vec<&OsStr> = vec!["run".as_ref(), "-t".as_ref()];
         if atty::is(atty::Stream::Stdout) && atty::is(atty::Stream::Stdin) {
             base_args.push("-i".as_ref());
         }

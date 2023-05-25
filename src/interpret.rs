@@ -7,10 +7,23 @@ use crate::volumes::resolve_volume_mounts;
 use anyhow::Error;
 use std::path;
 
+pub(crate) fn attach_container(spec: &spec::FlokiSpec) -> Result<(), Error> {
+    let cmd = build_command(spec)?;
+    cmd.attach(&[spec.shell.outer_shell()])?;
+    Ok(())
+}
+
 pub(crate) fn run_floki_container(
     spec: &spec::FlokiSpec,
     inner_command: &str,
 ) -> Result<(), Error> {
+    let cmd = build_command(spec)?;
+    let subshell_command = subshell_command(&spec.init, inner_command);
+
+    cmd.run(&[spec.shell.outer_shell(), "-c", &subshell_command])
+}
+
+fn build_command(spec: &spec::FlokiSpec) -> Result<DockerCommandBuilder, Error> {
     spec.image.obtain_image(&spec.paths.root)?;
 
     let mut cmd = command::DockerCommandBuilder::new(&spec.image.name()?, spec.name.to_string())
@@ -53,8 +66,7 @@ pub(crate) fn run_floki_container(
         None
     };
 
-    let subshell_command = subshell_command(&spec.init, inner_command);
-    cmd.run(&[spec.shell.outer_shell(), "-c", &subshell_command])
+    Ok(cmd)
 }
 
 pub(crate) fn command_in_shell(shell: &str, command: &[String]) -> String {
