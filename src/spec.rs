@@ -74,6 +74,7 @@ pub(crate) struct FlokiSpec {
     pub(crate) dind: Option<Dind>,
     /// Paths on the host which are relevant to running
     pub(crate) paths: Paths,
+    pub(crate) name: String,
 }
 
 impl FlokiSpec {
@@ -131,6 +132,9 @@ impl FlokiSpec {
             docker_switches,
             dind,
             paths,
+            name: config
+                .name
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string()),
         };
 
         debug!("built spec from config and environment: {:?}", spec);

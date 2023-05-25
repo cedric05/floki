@@ -107,9 +107,9 @@ impl DockerCommandBuilder {
         }
     }
 
-    pub fn new(image: &str) -> Self {
+    pub fn new(image: &str, name: String) -> Self {
         DockerCommandBuilder {
-            name: uuid::Uuid::new_v4().to_string(),
+            name: name,
             volumes: Vec::new(),
             environment: Vec::new(),
             switches: Vec::new(),

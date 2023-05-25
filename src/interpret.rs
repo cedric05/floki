@@ -13,7 +13,7 @@ pub(crate) fn run_floki_container(
 ) -> Result<(), Error> {
     spec.image.obtain_image(&spec.paths.root)?;
 
-    let mut cmd = command::DockerCommandBuilder::new(&spec.image.name()?)
+    let mut cmd = command::DockerCommandBuilder::new(&spec.image.name()?, spec.name.to_string())
         .add_volume((&spec.paths.root, &spec.mount));
 
     let volumes = resolve_volume_mounts(&spec.paths.config, &spec.paths.workspace, &spec.volumes);

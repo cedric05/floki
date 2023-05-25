@@ -94,6 +94,7 @@ pub(crate) struct FlokiConfig {
     pub(crate) volumes: BTreeMap<String, Volume>,
     #[serde(default = "default_entrypoint")]
     pub(crate) entrypoint: Entrypoint,
+    pub(crate) name: Option<String>,
 }
 
 impl FlokiConfig {
